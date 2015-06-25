@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
-import com.example.laboratorio.usbarduino.Funciones.ConexionIP;
+import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 
 /**
  * Created by Diego on 14/05/2015.

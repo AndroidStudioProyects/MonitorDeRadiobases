@@ -34,6 +34,39 @@
             </intent-filter>
         </activity>
         <activity android:name=".Actividades.Lay_Camara" />
+        <receiver android:name=".broadcastreceivers.Booteo">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+
+        <receiver android:name=".broadcastreceivers.BateriaBaja">
+            <intent-filter>
+                <action android:name="android.intent.action.battery_low"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcastreceivers.SistemaEnBateria">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcastreceivers.SistemaEnergizado">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".Services.KeepAlive"/>
+        <receiver android:name=".broadcastreceivers.SmsRecibido">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+
+
+
     </application>
 
 </manifest>

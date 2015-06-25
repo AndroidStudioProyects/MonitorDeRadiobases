@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.example.laboratorio.usbarduino.Funciones.ConexionIP;
+import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 
 /**
  * Created by Diego on 22/06/2015.

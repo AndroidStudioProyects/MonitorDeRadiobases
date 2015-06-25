@@ -3,7 +3,7 @@ package com.example.giovanazzi.monitorderadiobases.Funciones;
 import android.content.Context;
 import android.media.MediaPlayer;
 
-import com.example.laboratorio.usbarduino.R;
+import com.example.giovanazzi.monitorderadiobases.R;
 
 /**
  * Created by Diego on 14/05/2015.

@@ -186,8 +186,8 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
     protected void onProgressUpdate(Integer... values) {
        super.onProgressUpdate(values);
 
-   //    ac.progressBar.setProgress(values[0]);
-    //  ac.text_Bytes.setText("%" + values[0]);
+        ac.progressBar.setProgress(values[0]);
+      ac.text_BytesFTP.setText("%" + values[0]);
 
     }
 
@@ -195,9 +195,10 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
     protected void onPostExecute(Boolean o) {
         super.onPostExecute(o);
         if(o){
-         //   Toast.makeText(contexto,"archivo trasferido !!!"+o, Toast.LENGTH_SHORT).show();
-          //  ac.progressBar.setProgress(0);
-           // ac.text_Bytes.setText("Transmision Finalizada");
+            Toast.makeText(contexto,"archivo trasferido !!!"+o, Toast.LENGTH_SHORT).show();
+            ac.progressBar.setProgress(0);
+
+          //  ac.text_BytesFTP.setText("Transmision Finalizada");
 
         }
         else{

@@ -14,6 +14,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.giovanazzi.monitorderadiobases.Ftp.ConnectUploadAsync;
 import com.example.giovanazzi.monitorderadiobases.R;
@@ -46,13 +48,16 @@ public class Lay_Camara extends Activity{
     /// FTP////////////
     ConnectUploadAsync cliente;
 
-    ///////////////
+    ////// COMPONENTES DE XML +++///////////////
 
     private Button btn_Video,btn_Foto,btn_Enviar;
     private FrameLayout preview;
     private SurfaceView mPreview;
     static final  String  TAG ="MONITOR RADIOBASE";
+    public ProgressBar progressBar;
+    public TextView text_BytesFTP;
 
+    ////// COMPONENTES DE XML ------///////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,13 +81,9 @@ public class Lay_Camara extends Activity{
         Log.d(TAG, "OnDestroy inicio");
         releaseMediaRecorder();       // if you are using MediaRecorder, release it first
         releaseCamera();              // release the camera immediately on pause event
-        Log.d(TAG, "OnDestroy fin");
+
         Log.d(TAG,"Termino OnDestroy");
     }
-
-
-
-
 
     private void Botones() {
         btn_Foto.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +101,7 @@ public class Lay_Camara extends Activity{
             @Override
             public void onClick(View v) {
 
-
+                EnviarFTP();
 
             }
         });
@@ -123,6 +124,9 @@ public class Lay_Camara extends Activity{
 
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         mPreview = (SurfaceView) findViewById(R.id.surfaceView);
+
+        text_BytesFTP=(TextView)findViewById(R.id.text_BytesFTP);
+        progressBar=(ProgressBar)findViewById(R.id.progressBar);
 
         Log.d(TAG,"Termino LevantarXML");
 
@@ -348,7 +352,6 @@ public class Lay_Camara extends Activity{
         }
         return true;
     }
-
     private void releaseMediaRecorder(){
         if (mMediaRecorder != null) {
             mMediaRecorder.reset();   // clear recorder configuration
@@ -419,7 +422,7 @@ public class Lay_Camara extends Activity{
     private void EnviarFTP(){
 
 
-        String ip="localhost";//edit_IP.getText().toString();
+        String ip="192.168.0.102";//edit_IP.getText().toString();
         String ID_Radio="1";
         String userName="idirect";
         String pass="IDIRECT";
