@@ -34,6 +34,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Actividades.Lay_Camara" />
+        <activity android:name=".Actividades.Lay_USB" />
         <receiver android:name=".broadcastreceivers.Booteo">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
