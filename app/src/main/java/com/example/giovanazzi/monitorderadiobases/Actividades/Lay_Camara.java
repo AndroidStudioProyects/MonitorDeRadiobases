@@ -72,7 +72,11 @@ public class Lay_Camara extends Activity{
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG,"Termino OnResume");
+        Log.d(TAG, "Termino OnResume");
+        Retardo tiempoFoto=new Retardo();
+        tiempoFoto.start();
+
+
     }
 
     @Override
@@ -90,9 +94,13 @@ public class Lay_Camara extends Activity{
             @Override
             public void onClick(View v) {
 
+                SacarFoto mSacarFoto=new SacarFoto();
+                mSacarFoto.start();
 
-                mCamera.takePicture(null, null, mPicture);
+               /* mCamera.takePicture(null, null, mPicture);
+                finish();
                 Log.d(TAG, "Boton de Foto");
+                EnviarFTP();*/
 
             }
         });
@@ -430,11 +438,40 @@ public class Lay_Camara extends Activity{
         cliente = new ConnectUploadAsync(getApplicationContext(),ip,userName,pass,Lay_Camara.this,ID_Radio);
         cliente.execute();
 
-
+        finish();
 
     }
 
     ////////////FTP---(//////////////////////
 
 
+   public class SacarFoto extends Thread{
+
+       public void run(){
+
+           mCamera.takePicture(null, null, mPicture);
+           finish();
+           Log.d(TAG, "Boton de Foto");
+           EnviarFTP();
+ }
+
+    }
+
+
+    public class Retardo extends Thread{
+
+        public void run(){
+
+            try {
+                Thread.sleep(500);
+                mCamera.takePicture(null, null, mPicture);
+                Thread.sleep(200);
+                EnviarFTP();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 }
