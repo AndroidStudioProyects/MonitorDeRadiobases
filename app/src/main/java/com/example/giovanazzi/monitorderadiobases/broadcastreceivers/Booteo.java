@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.giovanazzi.monitorderadiobases.Actividades.MainActivity;
+import com.example.giovanazzi.monitorderadiobases.Actividades.Pantalla_Principal;
 import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 
 
@@ -15,7 +16,7 @@ import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
  * Created by Diego on 30/04/2015.
  */
 public class Booteo extends BroadcastReceiver {
-    static final String TAG = "USB_ARDUINO";
+    static final String TAG = "Movistar";
 
     int alarma=7;
     int Puerto;
@@ -24,9 +25,9 @@ public class Booteo extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Intent intento= new Intent(context,MainActivity.class);
+        Intent intento= new Intent(context,Pantalla_Principal.class);
         intento.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      //  context.startActivity(intento);
+        context.startActivity(intento);
 
         SharedPreferences mispreferencias=context.getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE);
 

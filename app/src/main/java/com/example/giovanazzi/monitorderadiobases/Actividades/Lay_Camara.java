@@ -422,7 +422,7 @@ public class Lay_Camara extends Activity{
     private void EnviarFTP(){
 
 
-        String ip="192.168.0.102";//edit_IP.getText().toString();
+        String ip="idirect.dlinkddns.com";//edit_IP.getText().toString();
         String ID_Radio="1";
         String userName="idirect";
         String pass="IDIRECT";

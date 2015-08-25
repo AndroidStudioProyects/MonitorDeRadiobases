@@ -1,78 +1,65 @@
 package com.example.giovanazzi.monitorderadiobases.Actividades;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ArrayAdapter;
+
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.giovanazzi.monitorderadiobases.R;
-import com.ftdi.j2xx.D2xxManager;
-import com.ftdi.j2xx.FT_Device;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.util.UUID;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    //////////USB+++ ///////////
-    static Context DeviceUARTContext;
-    D2xxManager ftdid2xx;
-    FT_Device ftDev = null;
-    int DevCount = -1;
-    int currentIndex = -1;
-    int openIndex = 0;
-    /*graphical objects*/
-    EditText readText;
-    EditText writeText;
-    Spinner baudSpinner;;
-    Spinner stopSpinner;
-    Spinner dataSpinner;
-    Spinner paritySpinner;
-    Spinner flowSpinner;
-    Spinner portSpinner;
-    ArrayAdapter<CharSequence> portAdapter;
+    private static final String TAG = "Movistar";
+    final int RECIEVE_MESSAGE=1;
+    private Button btnOn, btnOff,btn_Camara;
+    private TextView txtArduino;
+    private StringBuilder sb= new StringBuilder();
+    private BluetoothAdapter btAdapter = null;
+    private BluetoothSocket btSocket = null;
+    private OutputStream outStream = null;
+    private Handler h;
+    ConnectedThread mConnectedThread;
 
-    Button configButton;
-    Button openButton;
-    Button readEnButton;
-    Button writeButton;
-    static int iEnableReadFlag = 1;
+    // SPP UUID service
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    /*local variables*/
-    int baudRate; /*baud rate*/
-    byte stopBit; /*1:1stop bits, 2:2 stop bits*/
-    byte dataBit; /*8:8bit, 7: 7bit*/
-    byte parity;  /* 0: none, 1: odd, 2: even, 3: mark, 4: space*/
-    byte flowControl; /*0:none, 1: flow control(CTS,RTS)*/
-    int portNumber; /*port number*/
-    ArrayList<CharSequence> portNumberList;
+    // MAC-address of Bluetooth module (you must edit this line)
+    //Linvor Bluetooth
+    private static String address = "00:12:12:04:41:11";
 
-
-    public static final int readLength = 512;
-    public int readcount = 0;
-    public int iavailable = 0;
-    byte[] readData;
-    char[] readDataToText;
-    public boolean bReadThreadGoing = false;
-    public readThread read_thread;
-
-    boolean uart_configured = false;
+//**********
 
 
 
-    /////////USB ---////////
 
-    Button btn_Camara;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,30 +68,117 @@ public class MainActivity extends AppCompatActivity {
         LevantarXML();
         Botones();
 
+        h = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                switch (msg.what) {
+                    case RECIEVE_MESSAGE:                                                   // if receive massage
+                        byte[] readBuf = (byte[]) msg.obj;
+                        String strIncom = new String(readBuf, 0, msg.arg1);                 // create string from bytes array
+                        sb.append(strIncom);                                                // append string
+                        int endOfLineIndex = sb.indexOf("\r");                            // determine the end-of-line
+                        if (endOfLineIndex > 0) {                                            // if end-of-line,
+                            String sbprint = sb.substring(0, endOfLineIndex);               // extract string
+                            sb.delete(0, sb.length());                                      // and clear
+                            txtArduino.setText("Data from Arduino: " + sbprint);            // update TextView
+                            btnOff.setEnabled(true);
+                            btnOn.setEnabled(true);
+                        }
+                        Log.d(TAG, "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
+                        break;
+                }
+            };
+        };
+
+        ////defino bluetooth adapter
+
+        btAdapter=BluetoothAdapter.getDefaultAdapter();
+        checkBTState();//Checkeo el estado
+
+
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        DevCount = 0;
-        createDeviceList();
-        if(DevCount > 0)
-        {
-            connectFunction();
-            SetConfig(baudRate, dataBit, stopBit, parity, flowControl);
+
+        BluetoothDevice device = btAdapter.getRemoteDevice(address);// mac address de bluetooth
+
+        // Two things are needed to make a connection:
+        //   A MAC address, which we got above.
+        //   A Service ID or UUID.  In this case we are using the
+        //     UUID for SPP.
+
+        try {
+            btSocket = createBluetoothSocket(device);
+        } catch (IOException e1) {
+            errorExit("Fatal Error", "In onResume() and socket create failed: " + e1.getMessage() + ".");
         }
+
+        // Discovery is resource intensive.  Make sure it isn't going on
+        // when you attempt to connect and pass your message.
+        btAdapter.cancelDiscovery();
+
+        // Establish the connection.  This will block until it connects.
+        Log.d(TAG, "...Connecting...");
+        try {
+            btSocket.connect();
+            Log.d(TAG, "...Connection ok...");
+        } catch (IOException e) {
+            try {
+                btSocket.close();
+            } catch (IOException e2) {
+                errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
+            }
+        }
+
+        // Create a data stream so we can talk to server.
+        Log.d(TAG, "...Create Socket...");
+
+        try {
+            outStream = btSocket.getOutputStream();
+        } catch (IOException e) {
+            errorExit("Fatal Error", "In onResume() and output stream creation failed:" + e.getMessage() + ".");
+        }
+
+
+
+        mConnectedThread = new ConnectedThread(btSocket);
+        mConnectedThread.start();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        disconnectFunction();
+        Log.d(TAG, "...In onPause()...");
+
+        //
+        if (outStream != null) {
+            try {
+                outStream.flush();
+            } catch (IOException e) {
+                errorExit("Fatal Error", "In onPause() and failed to flush output stream: " + e.getMessage() + ".");
+            }
+        }
+
+        //intenta cerrar la comunicacion
+        try     {
+            btSocket.close();
+        } catch (IOException e2) {
+            errorExit("Fatal Error", "In onPause() and failed to close socket." + e2.getMessage() + ".");
+        }
+
     }
 
     private void LevantarXML(){
         btn_Camara=(Button)findViewById(R.id.btn_Camara);
+        btnOn = (Button) findViewById(R.id.btnOn);
+        btnOff = (Button) findViewById(R.id.btnOff);
+        txtArduino = (TextView) findViewById(R.id.txtArduino);      // for display the received data from the Arduino
+
+
+        Log.d(TAG, "XML LEvantado");
 
     }
 
@@ -118,324 +192,123 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        btnOn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mConnectedThread.write("1");
+                //  btnOn.setEnabled(false);
+                Log.d(TAG, "Led On");
+                Toast.makeText(getBaseContext(), "Turn On LED", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        btnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mConnectedThread.write("0");
+                //btnOff.setEnabled(false);
+                Log.d(TAG, "Led Off");
+                Toast.makeText(getBaseContext(), "Turn Off LED", Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
 
     }
 
-    ////////usb +++///////////////////
+
+    //Bluetooth +++++
 
 
 
-    public void createDeviceList()
-    {
-        int tempDevCount = ftdid2xx.createDeviceInfoList(DeviceUARTContext);
-
-        if (tempDevCount > 0)
-        {
-            if( DevCount != tempDevCount )
-            {
-                DevCount = tempDevCount;
-                updatePortNumberSelector();
+    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
+        if(Build.VERSION.SDK_INT >= 10){
+            try {
+                final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", new Class[] { UUID.class });
+                return (BluetoothSocket) m.invoke(device, MY_UUID);
+            } catch (Exception e) {
+                Log.e(TAG, "Could not create Insecure RFComm Connection",e);
             }
         }
-        else
-        {
-            DevCount = -1;
-            currentIndex = -1;
-        }
+        return  device.createRfcommSocketToServiceRecord(MY_UUID);
     }
 
-    public void disconnectFunction()
-    {
-        DevCount = -1;
-        currentIndex = -1;
-        bReadThreadGoing = false;
-        try {
-            Thread.sleep(50);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if(ftDev != null)
-        {
-            synchronized(ftDev)
-            {
-                if( true == ftDev.isOpen())
-                {
-                    ftDev.close();
-                }
+    private void checkBTState() {
+        // Check for Bluetooth support and then check to make sure it is turned on
+        // Emulator doesn't support Bluetooth and will return null
+        if(btAdapter==null) {
+            errorExit("Fatal Error", "Bluetooth not support");
+        } else {
+            if (btAdapter.isEnabled()) {
+                Log.d(TAG, "...Bluetooth ON...");
+            } else {
+                //Prompt user to turn on Bluetooth
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
             }
         }
+
     }
 
-    public void connectFunction()
-    {
-        int tmpProtNumber = openIndex + 1;
+    private void errorExit(String title, String message){
+        Toast.makeText(getBaseContext(), title + " - " + message, Toast.LENGTH_LONG).show();
+        finish();
+    }
 
-        if( currentIndex != openIndex )
-        {
-            if(null == ftDev)
-            {
-                ftDev = ftdid2xx.openByIndex(DeviceUARTContext, openIndex);
+    private class ConnectedThread extends Thread {
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+
+        public ConnectedThread(BluetoothSocket socket) {
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            // Get the input and output streams, using temp objects because
+            // member streams are final
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) {
             }
-            else
-            {
-                synchronized(ftDev)
-                {
-                    ftDev = ftdid2xx.openByIndex(DeviceUARTContext, openIndex);
-                }
-            }
-            uart_configured = false;
-        }
-        else
-        {
-            Toast.makeText(DeviceUARTContext, "Device port " + tmpProtNumber + " is already opened", Toast.LENGTH_LONG).show();
-            return;
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
         }
 
-        if(ftDev == null)
-        {
-            Toast.makeText(DeviceUARTContext,"open device port("+tmpProtNumber+") NG, ftDev == null", Toast.LENGTH_LONG).show();
-            return;
-        }
+        public void run() {
+            byte[] buffer = new byte[256];  // buffer store for the stream
+            int bytes; // bytes returned from read()
 
-        if (true == ftDev.isOpen())
-        {
-            currentIndex = openIndex;
-            Toast.makeText(DeviceUARTContext, "open device port(" + tmpProtNumber + ") OK", Toast.LENGTH_SHORT).show();
-
-            if(false == bReadThreadGoing)
-            {
-                read_thread = new readThread(handler);
-                read_thread.start();
-                bReadThreadGoing = true;
-            }
-        }
-        else
-        {
-            Toast.makeText(DeviceUARTContext, "open device port(" + tmpProtNumber + ") NG", Toast.LENGTH_LONG).show();
-            //Toast.makeText(DeviceUARTContext, "Need to get permission!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void updatePortNumberSelector()
-    {
-        //Toast.makeText(DeviceUARTContext, "updatePortNumberSelector:" + DevCount, Toast.LENGTH_SHORT).show();
-
-        if(DevCount == 2)
-        {
-            portAdapter = ArrayAdapter.createFromResource(DeviceUARTContext, R.array.port_list_2,
-                    R.layout.my_spinner_textview);
-            portAdapter.setDropDownViewResource(R.layout.my_spinner_textview);
-            portSpinner.setAdapter(portAdapter);
-            portAdapter.notifyDataSetChanged();
-            Toast.makeText(DeviceUARTContext, "2 port device attached", Toast.LENGTH_SHORT).show();
-            //portSpinner.setOnItemSelectedListener(new MyOnPortSelectedListener());
-        }
-        else if(DevCount == 4)
-        {
-            portAdapter = ArrayAdapter.createFromResource(DeviceUARTContext, R.array.port_list_4,
-                    R.layout.my_spinner_textview);
-            portAdapter.setDropDownViewResource(R.layout.my_spinner_textview);
-            portSpinner.setAdapter(portAdapter);
-            portAdapter.notifyDataSetChanged();
-            Toast.makeText(DeviceUARTContext, "4 port device attached", Toast.LENGTH_SHORT).show();
-            //portSpinner.setOnItemSelectedListener(new MyOnPortSelectedListener());
-        }
-        else
-        {
-            portAdapter = ArrayAdapter.createFromResource(DeviceUARTContext, R.array.port_list_1,
-                    R.layout.my_spinner_textview);
-            portAdapter.setDropDownViewResource(R.layout.my_spinner_textview);
-            portSpinner.setAdapter(portAdapter);
-            portAdapter.notifyDataSetChanged();
-            Toast.makeText(DeviceUARTContext, "1 port device attached", Toast.LENGTH_SHORT).show();
-            //portSpinner.setOnItemSelectedListener(new MyOnPortSelectedListener());
-        }
-
-    }
-
-
-
-    public void SetConfig(int baud, byte dataBits, byte stopBits, byte parity, byte flowControl)
-    {
-        if (ftDev.isOpen() == false) {
-            Log.e("j2xx", "SetConfig: device not open");
-            return;
-        }
-
-        // configure our port
-        // reset to UART mode for 232 devices
-        ftDev.setBitMode((byte) 0, D2xxManager.FT_BITMODE_RESET);
-
-        ftDev.setBaudRate(baud);
-
-        switch (dataBits) {
-            case 7:
-                dataBits = D2xxManager.FT_DATA_BITS_7;
-                break;
-            case 8:
-                dataBits = D2xxManager.FT_DATA_BITS_8;
-                break;
-            default:
-                dataBits = D2xxManager.FT_DATA_BITS_8;
-                break;
-        }
-
-        switch (stopBits) {
-            case 1:
-                stopBits = D2xxManager.FT_STOP_BITS_1;
-                break;
-            case 2:
-                stopBits = D2xxManager.FT_STOP_BITS_2;
-                break;
-            default:
-                stopBits = D2xxManager.FT_STOP_BITS_1;
-                break;
-        }
-
-        switch (parity) {
-            case 0:
-                parity = D2xxManager.FT_PARITY_NONE;
-                break;
-            case 1:
-                parity = D2xxManager.FT_PARITY_ODD;
-                break;
-            case 2:
-                parity = D2xxManager.FT_PARITY_EVEN;
-                break;
-            case 3:
-                parity = D2xxManager.FT_PARITY_MARK;
-                break;
-            case 4:
-                parity = D2xxManager.FT_PARITY_SPACE;
-                break;
-            default:
-                parity = D2xxManager.FT_PARITY_NONE;
-                break;
-        }
-
-        ftDev.setDataCharacteristics(dataBits, stopBits, parity);
-
-        short flowCtrlSetting;
-        switch (flowControl) {
-            case 0:
-                flowCtrlSetting = D2xxManager.FT_FLOW_NONE;
-                break;
-            case 1:
-                flowCtrlSetting = D2xxManager.FT_FLOW_RTS_CTS;
-                break;
-            case 2:
-                flowCtrlSetting = D2xxManager.FT_FLOW_DTR_DSR;
-                break;
-            case 3:
-                flowCtrlSetting = D2xxManager.FT_FLOW_XON_XOFF;
-                break;
-            default:
-                flowCtrlSetting = D2xxManager.FT_FLOW_NONE;
-                break;
-        }
-
-        // TODO : flow ctrl: XOFF/XOM
-        // TODO : flow ctrl: XOFF/XOM
-        ftDev.setFlowControl(flowCtrlSetting, (byte) 0x0b, (byte) 0x0d);
-
-        uart_configured = true;
-        Toast.makeText(DeviceUARTContext, "Config done", Toast.LENGTH_SHORT).show();
-    }
-
-    public void EnableRead (){
-        iEnableReadFlag = (iEnableReadFlag + 1)%2;
-
-        if(iEnableReadFlag == 1) {
-            ftDev.purge((byte) (D2xxManager.FT_PURGE_TX));
-            ftDev.restartInTask();
-            readEnButton.setText("Read Enabled");
-        }
-        else{
-            ftDev.stopInTask();
-            readEnButton.setText("Read Disabled");
-        }
-    }
-
-    public void SendMessage() {
-        if (ftDev.isOpen() == false) {
-            Log.e("j2xx", "SendMessage: device not open");
-            return;
-        }
-
-        ftDev.setLatencyTimer((byte) 16);
-//		ftDev.purge((byte) (D2xxManager.FT_PURGE_TX | D2xxManager.FT_PURGE_RX));
-
-        String writeData = writeText.getText().toString();
-        byte[] OutData = writeData.getBytes();
-        ftDev.write(OutData, writeData.length());
-    }
-
-    final Handler handler =  new Handler()
-    {
-        @Override
-        public void handleMessage(Message msg)
-        {
-            if(iavailable > 0)
-            {
-                readText.append(String.copyValueOf(readDataToText, 0, iavailable));
-            }
-        }
-    };
-
-    private class readThread  extends Thread
-    {
-        Handler mHandler;
-
-        readThread(Handler h){
-            mHandler = h;
-            this.setPriority(Thread.MIN_PRIORITY);
-        }
-
-        @Override
-        public void run()
-        {
-            int i;
-
-            while(true == bReadThreadGoing)
-            {
+            // Keep listening to the InputStream until an exception occurs
+            while (true) {
                 try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                }
-
-                synchronized(ftDev)
-                {
-                    iavailable = ftDev.getQueueStatus();
-                    if (iavailable > 0) {
-
-                        if(iavailable > readLength){
-                            iavailable = readLength;
-                        }
-
-                        ftDev.read(readData, iavailable);
-                        for (i = 0; i < iavailable; i++) {
-                            readDataToText[i] = (char) readData[i];
-                        }
-                        Message msg = mHandler.obtainMessage();
-                        mHandler.sendMessage(msg);
-                    }
+                    // Read from the InputStream
+                    bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
+                    h.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();     // Send to message queue Handler
+                } catch (IOException e) {
+                    break;
                 }
             }
         }
 
+        /* Call this from the main activity to send data to the remote device */
+        public void write(String message) {
+            Log.d(TAG, "...Data to send: " + message + "...");
+            byte[] msgBuffer = message.getBytes();
+            try {
+                mmOutStream.write(msgBuffer);
+            } catch (IOException e) {
+                Log.d(TAG, "...Error data send: " + e.getMessage() + "...");
+            }
+        }
     }
 
 
+    //Bluetooth-----
 
 
 
-
-
-
-    //////////// usb ---/////////
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
