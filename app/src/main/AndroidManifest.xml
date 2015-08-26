@@ -59,7 +59,7 @@
         </receiver>
 
         <service android:name=".Services.KeepAlive"/>
-
+        <service android:name=".Services.CameraService"></service>
         <receiver android:name=".broadcastreceivers.SmsRecibido">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>

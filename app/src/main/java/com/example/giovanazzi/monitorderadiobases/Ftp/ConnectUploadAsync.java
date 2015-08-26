@@ -6,7 +6,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.giovanazzi.monitorderadiobases.Actividades.Lay_Camara;
+
+import com.example.giovanazzi.monitorderadiobases.Actividades.Pantalla_Principal;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -36,12 +37,12 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
     String Errores=null;
     File fileLast;
     String ip, userName,pass;
-    Lay_Camara ac;
+    Pantalla_Principal ac;
     String IdRadiobase;
     final static String TAG="Api FTP";
 
 
-    public ConnectUploadAsync(Context contexto, String ip, String userName, String pass, Lay_Camara ac, String IdRadiobase){
+    public ConnectUploadAsync(Context contexto, String ip, String userName, String pass, Pantalla_Principal ac, String IdRadiobase){
 
         this.contexto=contexto;
         this.ip=ip;
@@ -186,8 +187,8 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
     protected void onProgressUpdate(Integer... values) {
        super.onProgressUpdate(values);
 
-        ac.progressBar.setProgress(values[0]);
-      ac.text_BytesFTP.setText("%" + values[0]);
+        ac.progressBar_P.setProgress(values[0]);
+      ac.text_BytesFTP_P.setText("%" + values[0]);
 
     }
 
@@ -196,9 +197,9 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
         super.onPostExecute(o);
         if(o){
             Toast.makeText(contexto,"archivo trasferido !!!"+o, Toast.LENGTH_SHORT).show();
-            ac.progressBar.setProgress(0);
+            ac.progressBar_P.setProgress(0);
 
-          //  ac.text_BytesFTP.setText("Transmision Finalizada");
+           ac.text_BytesFTP_P.setText("Transmision Finalizada");
 
         }
         else{

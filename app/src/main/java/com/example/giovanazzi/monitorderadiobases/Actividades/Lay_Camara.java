@@ -53,7 +53,7 @@ public class Lay_Camara extends Activity{
     private Button btn_Video,btn_Foto,btn_Enviar;
     private FrameLayout preview;
     private SurfaceView mPreview;
-    static final  String  TAG ="MONITOR RADIOBASE";
+    static final  String  TAG ="Movistar";
     public ProgressBar progressBar;
     public TextView text_BytesFTP;
 
@@ -62,10 +62,13 @@ public class Lay_Camara extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lay_camara);
+
+
         LevantarXML();
         Botones();
         CAMARA_ON();
-        Log.d(TAG,"Termino OnCreate");
+        Log.d(TAG, "CAMARA Oncreate");
+
     }
 
 
@@ -75,6 +78,8 @@ public class Lay_Camara extends Activity{
         Log.d(TAG, "Termino OnResume");
         Retardo tiempoFoto=new Retardo();
         tiempoFoto.start();
+        Log.d(TAG, "CAMARA On resume saca foto");
+
 
 
     }
@@ -85,6 +90,8 @@ public class Lay_Camara extends Activity{
         Log.d(TAG, "OnDestroy inicio");
         releaseMediaRecorder();       // if you are using MediaRecorder, release it first
         releaseCamera();              // release the camera immediately on pause event
+        Log.d(TAG, "CAMARA onDestroy cierra camara");
+
 
         Log.d(TAG,"Termino OnDestroy");
     }
@@ -93,14 +100,6 @@ public class Lay_Camara extends Activity{
         btn_Foto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                SacarFoto mSacarFoto=new SacarFoto();
-                mSacarFoto.start();
-
-               /* mCamera.takePicture(null, null, mPicture);
-                finish();
-                Log.d(TAG, "Boton de Foto");
-                EnviarFTP();*/
 
             }
         });
@@ -127,7 +126,7 @@ public class Lay_Camara extends Activity{
 
         btn_Video=(Button)findViewById(R.id.btn_Video);
         btn_Enviar=(Button)findViewById(R.id.btn_Enviar);
-        btn_Foto=(Button)findViewById(R.id.btn_Foto);
+        btn_Foto=(Button)findViewById(R.id.btn_Foto_P);
 
 
         preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -435,27 +434,15 @@ public class Lay_Camara extends Activity{
         String userName="idirect";
         String pass="IDIRECT";
 
-        cliente = new ConnectUploadAsync(getApplicationContext(),ip,userName,pass,Lay_Camara.this,ID_Radio);
-        cliente.execute();
+     //   cliente = new ConnectUploadAsync(getApplicationContext(),ip,userName,pass,Lay_Camara.this,ID_Radio);
+     //   cliente.execute();
 
-        finish();
+     //   finish();
 
     }
 
     ////////////FTP---(//////////////////////
 
-
-   public class SacarFoto extends Thread{
-
-       public void run(){
-
-           mCamera.takePicture(null, null, mPicture);
-           finish();
-           Log.d(TAG, "Boton de Foto");
-           EnviarFTP();
- }
-
-    }
 
 
     public class Retardo extends Thread{
