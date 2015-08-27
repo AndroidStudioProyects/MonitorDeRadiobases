@@ -14,7 +14,7 @@ import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 public class SistemaEnBateria extends BroadcastReceiver {
 
 int alarma=4;// red electrica coratada ,, sistema en baterias
-    static final String TAG = "USB_ARDUINO";
+    static final String TAG = "Movistar";
     String IP;
     int Puerto;
     String  idRadiobase;

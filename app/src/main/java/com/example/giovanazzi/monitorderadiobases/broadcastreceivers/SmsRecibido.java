@@ -15,7 +15,7 @@ import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
  */
 public class SmsRecibido extends BroadcastReceiver {
    // Context contexto;
-   static final String TAG = "USB_ARDUINO";
+   static final String TAG = "Movistar";
 
     int alarma=9;// SMS recibido
     String IP;

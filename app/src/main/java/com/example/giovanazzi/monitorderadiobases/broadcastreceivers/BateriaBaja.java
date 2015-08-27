@@ -14,7 +14,7 @@ import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 public class BateriaBaja extends BroadcastReceiver {
 
     Context contexto;
-    static final String TAG = "USB_ARDUINO";
+    static final String TAG = "Movistar";
 
     ConexionIP ClienteTCP;
     String IP,idRadiobase;

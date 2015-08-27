@@ -25,6 +25,15 @@ public class Booteo extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+
+        try {
+            Log.d(TAG, "Esperando 30 seguntos para arrancar la api");
+
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "LAnzando apliacacion");
         Intent intento= new Intent(context,Pantalla_Principal.class);
         intento.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intento);
