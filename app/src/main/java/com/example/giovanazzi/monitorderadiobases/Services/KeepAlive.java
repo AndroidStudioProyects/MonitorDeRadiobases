@@ -27,7 +27,7 @@ public class KeepAlive extends Service {
     Intent intento;
     Hilo hilito;
     Context contexto;
-BatteryManager bateria;
+
 
 
     @Override
@@ -40,9 +40,10 @@ BatteryManager bateria;
         PuertoKA=intento.getExtras().getInt("PuertoKA");
         Bool = intento.getExtras().getBoolean("bool");
         TiempoSeg = intento.getExtras().getInt("Timer");
+        Toast.makeText(getApplicationContext(), "Servicio iniciado: " + Bool, Toast.LENGTH_SHORT).show();
+
         hilito=new Hilo();
         hilito.start();
-        Toast.makeText(getApplicationContext(), "Servicio iniciado: " + Bool, Toast.LENGTH_SHORT).show();
 
       return START_STICKY;
     }
@@ -74,14 +75,14 @@ BatteryManager bateria;
             while(Bool){
               //  String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());dd-MM-yyyy HH:mm:ss
                 String timeStamp = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
-                Log.d("USB_ARDUINO", "Bool " + Bool);
+                Log.d("Movistar", "Bool " + Bool);
 
 
             try {
 
                 Thread.sleep(TiempoSeg*1000);
                 ClienteTCP=new ConexionIP(IpPublica,PuertoKA," "+IdRadiobase+" 1 "+timeStamp);
-             //   Log.d("USB_ARDUINO", "IpPublica: "+IpPublica +"PuertoKA: "+PuertoKA+ "TiempoSeg: "+TiempoSeg+"Bool: "+Bool+"IdRadiobase: "+IdRadiobase);
+                Log.d("Movistar", "IpPublica: "+IpPublica +"PuertoKA: "+PuertoKA+ "TiempoSeg: "+TiempoSeg+"Bool: "+Bool+"IdRadiobase: "+IdRadiobase);
                 ClienteTCP.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
