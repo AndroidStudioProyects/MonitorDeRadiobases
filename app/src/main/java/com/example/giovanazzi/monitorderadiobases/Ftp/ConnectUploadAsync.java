@@ -38,11 +38,11 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
     File fileLast;
     String ip, userName,pass;
     Pantalla_Principal ac;
-    String IdRadiobase;
-    final static String TAG="Api FTP";
+    int IdRadiobase;
+    final static String TAG="Movistar";
 
 
-    public ConnectUploadAsync(Context contexto, String ip, String userName, String pass, Pantalla_Principal ac, String IdRadiobase){
+    public ConnectUploadAsync(Context contexto, String ip, String userName, String pass, Pantalla_Principal ac, int IdRadiobase){
 
         this.contexto=contexto;
         this.ip=ip;
@@ -156,7 +156,7 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
 
             completed = mFtpClient.completePendingCommand();
             if (completed) {
-                System.out.println("The second file is uploaded successfully.");
+
                 fileLast.delete();
                 mFtpClient.disconnect();
 
@@ -205,7 +205,7 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
         else{
          Toast.makeText(contexto,"no se pudo transmitir"+o,Toast.LENGTH_SHORT).show();
                 }
-      //  Toast.makeText(contexto,"Errores:"+Errores,Toast.LENGTH_SHORT).show();
+
     }
 
 

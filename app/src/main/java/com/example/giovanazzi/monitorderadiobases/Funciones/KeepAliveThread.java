@@ -42,12 +42,12 @@ public class KeepAliveThread extends Thread {
                 if(!BoolKAThread){break;}
                 //  String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());dd-MM-yyyy HH:mm:ss
                 String timeStamp = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
-                Log.d(TAG, "BoolKAThread: " + BoolKAThread);
+
                 try {
 
                     Thread.sleep(TiempoSeg*1000);
                     ClienteTCP=new ConexionIP(IpPublica,Puerto," "+IdRadiobase+" 1 "+timeStamp);
-                    Log.d(TAG, "IpPublica: "+IpPublica +"PuertoKA: "+Puerto+ "TiempoSeg: "+TiempoSeg+"Bool: "+BoolKAThread+"IdRadiobase: "+IdRadiobase);
+                    Log.d(TAG, " IdRadio:"+IdRadiobase+ " IpPublica:"+ IpPublica+" Puerto:"+Puerto+ " Tiempo:"+TiempoSeg+" seg.");
                     ClienteTCP.start();
                 } catch (InterruptedException e) {
                     e.printStackTrace();

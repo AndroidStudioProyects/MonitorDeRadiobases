@@ -31,7 +31,7 @@ public class TomarFoto  {
     Camera.Parameters parameters;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
-    private int calidadFoto = 90;
+    private int calidadFoto = 100;
     Context context;
     static int IdRadio;
 
