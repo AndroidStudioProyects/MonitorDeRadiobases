@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.example.giovanazzi.monitorderadiobases.Actividades.MainActivity;
 import com.example.giovanazzi.monitorderadiobases.Actividades.Pantalla_Principal;
 import com.example.giovanazzi.monitorderadiobases.Funciones.ConexionIP;
 

@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.CAMERA"></uses-permission>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-feature android:name="android.hardware.usb.host" />
+
     <uses-feature android:name="android.hardware.camera"
         android:required="true"/>
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -31,8 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".Actividades.MainActivity"></activity>
 
         <receiver android:name=".broadcastreceivers.Booteo">
             <intent-filter>

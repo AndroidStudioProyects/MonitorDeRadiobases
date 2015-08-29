@@ -67,7 +67,7 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
 
 
 
-            Log.d(TAG, "Se conecto: " + String.valueOf(status));
+          //  Log.d(TAG, "Se conecto: " + String.valueOf(status));
             if (FTPReply.isPositiveCompletion(mFtpClient.getReplyCode())) {
                 mFtpClient.setFileType(FTP.BINARY_FILE_TYPE);
                 mFtpClient.enterLocalPassiveMode();
@@ -77,7 +77,7 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
               //  Log.d("Api FTP", "Numeros de archivos" + String.valueOf(mFileArray.length));
 
                 for(int i=0;i<mFileArray.length;i++){
-                    Log.d(TAG,"nombre archivo"+ mFileArray[i].getName());
+            //        Log.d(TAG,"nombre archivo"+ mFileArray[i].getName());
                   }
 
                 Log.d(TAG, "IP Server:" + String.valueOf(mFtpClient.getRemoteAddress()));
@@ -98,7 +98,7 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
                     File file = files[i];
 
                     //Si es directorio...
-                   System.out.println("[" + i + "]" + file.getName());
+               //    System.out.println("[" + i + "]" + file.getName());
                 }
 
         try {  fileLast = files[files.length-1];
@@ -123,10 +123,10 @@ public class ConnectUploadAsync extends AsyncTask <Void,Integer,Boolean> {
             if (created) {
 
                 // the directory is created, everything is going well
-                Log.d(TAG, "Directorio creado");
+         //       Log.d(TAG, "Directorio creado");
 
             } else {
-                Log.d(TAG, "No se pudo Crear directorio");
+           //     Log.d(TAG, "No se pudo Crear directorio");
 
                 // something unexpected happened...
             }
